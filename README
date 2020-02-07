@@ -7,3 +7,27 @@ commodore processor
 ( modern 64 bit approach)
 
 Coming Soon !
+
+x86 32/64 instruction code
+
+http://ref.x86asm.net/index.html
+
+http://ref.x86asm.net/coder64-abc.html
+
+ASSEMBLER / DISASSEMBLER online
+
+https://defuse.ca/online-x86-assembler.htm#disassembly2
+
+TUTORIAL ENCODING
+
+http://www.c-jump.com/CIS77/CPU/x86/index.html
+
+https://www-user.tu-chemnitz.de/~heha/viewchm.php/hs/x86.chm/
+
+https://wiki.osdev.org/X86-64_Instruction_Encoding
+
+
+x86 Instruction Set Reference
+
+https://c9x.me/x86/
+
