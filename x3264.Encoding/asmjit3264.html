@@ -1,0 +1,782 @@
+﻿<!DOCTYPE html>
+<html>  
+
+<script src="jquery-3.4.1.min.js"></script>
+
+<body>
+
+
+<div id="opcode_tab" hidden>
+§,ADD,r/m8,r8,,,,,,0,,r,,,,,L,,o..szapc,o..szapc,,,Add
+§,ADD,r/m16/32/64,r16/32/64,,,,,,1,,r,,,,,L,,o..szapc,o..szapc,,,Add
+§,ADD,r8,r/m8,,,,,,2,,r,,,,,,,o..szapc,o..szapc,,,Add
+§,ADD,r16/32/64,r/m16/32/64,,,,,,3,,r,,,,,,,o..szapc,o..szapc,,,Add
+§,ADD,AL,imm8,,,,,,4,,,,,,,,,o..szapc,o..szapc,,,Add
+§,ADD,rAX,imm16/32,,,,,,5,,,,,,,,,o..szapc,o..szapc,,,Add
+§,ADD,r/m8,imm8,,,,,,80,,0,,,,,L,,o..szapc,o..szapc,,,Add
+§,ADD,r/m16/32/64,imm16/32,,,,,,81,,0,,,,,L,,o..szapc,o..szapc,,,Add
+§,ADD,r/m8,imm8,,,,,,82,,0,,,,,L,,o..szapc,o..szapc,,,Add
+§,ADD,r/m16/32/64,imm8,,,,,,83,,0,,,,,L,,o..szapc,o..szapc,,,Add
+</div>
+
+#0 SO
+<br>
+<select id="select_so">
+<option value="32" selected="selected" >  32 bit  </option>
+<option value="64">  64 bit  </option>
+</select>
+<br>
+<hr>
+istruction prefix
+<hr>
+#1 lock rep/repne
+<br>
+<select id="select_istr_prefix_lock_rep">
+<option value="">  *   </option>
+<option value="f0">  lock   </option>
+<option value="f3">  rep , repe   </option>
+<option value="f2">  repne </option>
+</select>
+<br>
+#2 segment override
+<br>
+<select id="select_segment_override">
+<option value="">  *   </option>
+<option value="2e">   cs  </option>
+<option value="36">   ss </option>
+<option value="3e">   ds </option>
+<option value="26">   es  </option>
+<option value="64">   fs </option>
+<option value="65">   gs </option>
+</select>
+<br>
+#3 operand size override
+<br>
+<select id="select_operand_size_override">
+<option value="">  *   </option>
+<option value="66">   OP  </option>
+</select>
+<br>
+#4 address size override
+<br>
+<select id="select_address_size_override">
+<option value="">  *   </option>
+<option value="67">   Addr  </option>
+</select>
+<hr>
+#4 REX [40-4F] :: <strong><label id="rex_opcode"></label></strong>
+<br>
+[7-4] base <select class="rex"  id="select_rex_base">
+<option value="*">  *   </option>
+<option value="0100">   0100  </option>
+</select>
+<br> [3] rex.w 
+<select class="rex" id="select_rex_w">
+<option value="0">  0   </option>
+<option value="1">  1   </option>
+</select> : [0] default [1] promote 64 bit
+<br> [2] rex.r 
+<select class="rex" id="select_rex_r">
+<option value="0">  0   </option>
+<option value="1">  1   </option>
+</select> : Extension of the ModR/M reg field
+<br> [1] rex.x
+<select class="rex" id="select_rex_x">
+<option value="0">  0   </option>
+<option value="1">  1   </option>
+</select> : Extension of the SIB index field
+<br> [0] rex.b 
+<select class="rex" id="select_rex_b">
+<option value="0">  0   </option>
+<option value="1">  1   </option>
+</select> : Extension of the ModR/M r/m field, SIB base field, or Opcode reg field
+<hr>
+opcode
+<select id="select_opcode"> 
+</select>
+<br>pf <strong><label id="lbl_opcode_pf"></label></strong> 
+<br>0f <strong><label id="lbl_opcode_0f"></label></strong> 
+<br>po <strong><label id="lbl_opcode_po"></label></strong>
+:: imm [ <strong><label id="lbl_opcode_po_imm"></label>  ]</strong>  
+:: d  [ <strong><label id="lbl_opcode_po_d"></label> ]</strong>   
+:: s [ <strong><label id="lbl_opcode_po_s"></label> ]</strong> 
+<br>so <strong><label id="lbl_opcode_so"></label></strong>
+<br>o  <strong><label id="lbl_opcode_o"></label></strong>  
+<hr>
+mod r/m
+<br>
+<select id="select_modregrm_modrm">
+<option value='*'>*</option>
+<option value='{ "mod":"00","rm":"000"  }'> 00 000	16bit [BX+SI]			REX.B=0::[RAX/EAX]			REX.B=1::[R8/R8D]	</p></option>	
+<option value='{ "mod":"00","rm":"001"	}'> 00 001	16bit [BX+DI]			REX.B=0::[RCX/ECX]			REX.B=1::[R9/R9D]	</option>			 
+<option value='{ "mod":"00","rm":"010"	}'>	00 010	16bit [BP+SI]			REX.B=0::[RDX/EDX]			REX.B=1::[R10/R10D]	</option>		 
+<option value='{ "mod":"00","rm":"011"	}'>	00 011	16bit [BP+DI]			REX.B=0::[RBX/EBX]			REX.B=1::[R11/R11D]		</option>	 
+<option value='{ "mod":"00","rm":"100"	}'>	00 100	16bit [SI]				REX.B=0::[sib]				REX.B=1::[sib]	</option>			 
+<option value='{ "mod":"00","rm":"101"	}'>	00 101	16bit [DI]				REX.B=0::[RIP/EIP]+disp32	REX.B=1::[RIP/EIP]+disp32	</option>	 
+<option value='{ "mod":"00","rm":"110"	}'>	00 110	16bit disp16			REX.B=0::[RSI/ESI]			REX.B=1::[R14/R14D]		</option>	 
+<option value='{ "mod":"00","rm":"111"	}'>	00 111	16bit [BX]				REX.B=0::[RDI/EDI]			REX.B=1::[R15/R15D]		</option>	 
+
+<option value='{ "mod":"01","rm":"000"  }'>	01 000	16bit [BX+SI]+disp8		REX.B=0::[RAX/EAX]+disp8	REX.B=1::[R8/R8D]+disp8	</option>		 
+<option value='{ "mod":"01","rm":"001"	}'>	01 001	16bit [BX+DI]+disp8		REX.B=0::[RCX/EDX]+disp8	REX.B=1::[R9/R9D]+disp8		</option>	 
+<option value='{ "mod":"01","rm":"010"	}'>	01 010	16bit [BP+SI]+disp8		REX.B=0::[RDX/EDX]+disp8	REX.B=1::[R10/R10D]+disp8	</option>	 
+<option value='{ "mod":"01","rm":"011"	}'>	01 011	16bit [BP+DI]+disp8		REX.B=0::[RBX/EBX]+disp8	REX.B=1::[R11/R11D]+disp8	</option>	 
+<option value='{ "mod":"01","rm":"100"	}'>	01 100	16bit [SI]+disp8		REX.B=0::[sib]+disp8		REX.B=1::[sib]+disp8	</option>		 
+<option value='{ "mod":"01","rm":"101"	}'>	01 101	16bit [DI]+disp8		REX.B=0::[RBP/EBP]+disp8	REX.B=1::[R13/R13D]+disp8	</option>	 
+<option value='{ "mod":"01","rm":"110"	}'>	01 110  16bit [BP]+disp8		REX.B=0::[RSI/ESI]+disp8	REX.B=1::[R14/R14D]+disp8	</option>	 
+<option value='{ "mod":"01","rm":"111"	}'>	01 111	16bit [BX]+disp8		REX.B=0::[RDI/EDI]+disp8	REX.B=1::[R15/R15D]+disp8 	</option>
+
+<option value='{ "mod":"10","rm":"000"  }'>	10 000	16bit [BX+SI]+disp16	REX.B=0::[RAX/EAX]+disp32	REX.B=1::[R8/R8D]+disp32	</option>	 
+<option value='{ "mod":"10","rm":"001"	}'>	10 001	16bit [BX+DI]+disp16	REX.B=0::[RCX/EDX]+disp32	REX.B=1::[R9/R9D]+disp32	</option>	 
+<option value='{ "mod":"10","rm":"010"	}'>	10 010	16bit [BP+SI]+disp16	REX.B=0::[RDX/EDX]+disp32	REX.B=1::[R10/R10D]+disp32	</option>	 
+<option value='{ "mod":"10","rm":"011"	}'>	10 011	16bit [BP+DI]+disp16	REX.B=0::[RBX/EBX]+disp32	REX.B=1::[R11/R11D]+disp32	</option>	 
+<option value='{ "mod":"10","rm":"100"	}'>	10 100	16bit [SI]+disp16 		REX.B=0::[sib]+disp32		REX.B=1::[sib]+disp32 	</option>
+<option value='{ "mod":"10","rm":"101"	}'>	10 101	16bit [DI]+disp16		REX.B=0::[RBP/EBP]+disp32	REX.B=1::[R13/R13D]+disp32 	</option>
+<option value='{ "mod":"10","rm":"110"	}'>	10 110  16bit [BP]+disp16		REX.B=0::[RSI/ESI]+disp32	REX.B=1::[R14/R14D]+disp32 	</option>
+<option value='{ "mod":"10","rm":"111"	}'>	10 111	16bit [BX]+disp16		REX.B=0::[RDI/EDI]+disp32	REX.B=1::[R15/R15D]+disp32	</option>
+
+<option value='{ "mod":"11","rm":"000"  }'>	11 000	16bit || REX.B=0::AL/AX/EAX/RAX/ST0/MM0/XMM0	... REX.B=1::R8B/R8W/R8D/R8/ST0/MM0/XMM8	</option>	
+<option value='{ "mod":"11","rm":"001"	}'>	11 001	16bit || REX.B=0::CL/CX/ECX/RCX/ST1/MM1/XMM1	... REX.B=1::R9B/R9W/R9D/R9/ST1/MM1/XMM9 	</option>
+<option value='{ "mod":"11","rm":"010"	}'>	11 010	16bit || REX.B=0::DL/DX/EDX/RDX/ST2/MM2/XMM2	... REX.B=1::R10B/R10W/R10D/R10/ST2/MM2/XMM10 	</option>
+<option value='{ "mod":"11","rm":"011"	}'>	11 011	16bit || REX.B=0::BL/BX/EBX/RBX/ST3/MM3/XMM3	... REX.B=1::R11B/R11W/R11D/R11/ST3/MM3/XMM112 	</option>
+<option value='{ "mod":"11","rm":"100"	}'>	11 100	16bit || REX.B=0::AH/SP/ESP/RSP/ST4/MM4/XMM4	... REX.B=1::R12B/R12W/R12D/R12/ST4/MM4/XMM12	</option> 
+<option value='{ "mod":"11","rm":"101"	}'>	11 101	16bit || REX.B=0::CH/BP/EBP/RBP/ST5/MM5/XMM5	... REX.B=1::R13B/R13W/R13D/R13/ST5/MM5/XMM13 	</option>
+<option value='{ "mod":"11","rm":"110"	}'>	11 110  16bit || REX.B=0::DH/SI/ESI/RSI/ST6/MM6/XMM6	... REX.B=1::R14B/R14W/R14D/R14/ST6/MM6/XMM14 	</option>
+<option value='{ "mod":"11","rm":"111"	}'>	11 111	16bit || REX.B=0::BH/DI/EDI/RDI/ST7/MM7/XMM7	... REX.B=1::R15B/R15W/R15D/R15/ST7/MM7/XMM15 	</option>
+
+</select>
+
+<br>
+reg
+<br>
+<select id="select_modregrm_modrm_reg">
+<option value=''>*</option>
+<option value='000'> 	000	16bit || REX.R=0::r[al ax eax mm0 xmm0 es cr0 dr0] 	... REX.R=1::r[r8b  r8w  r8d  r8  mm0  xmm8  es  cr8 ---]</option>
+<option value='001'> 	001	16bit || REX.R=0::r[cl cx ecx mm1 xmm1 cs --- dr1]  ... REX.R=1::r[r9b  r9w  r9d  r9  mm1  xmm9  cs  --- ---]</option>
+<option value='010'> 	010	16bit || REX.R=0::r[dl dx edx mm2 xmm2 ss cr2 dr2] 	...	REX.R=1::r[r10b r10w r10d r10 mm2  xmm10 ss  --- ---]</option> 
+<option value='011'> 	011	16bit || REX.R=0::r[bl bx ebx mm3 xmm3 ds cr3 dr3]  ...	REX.R=1::r[r11b r11w r11d r11 mm3  xmm11 ds  --- ---]</option> 
+<option value='100'> 	100	16bit || REX.R=0::r[ah sp esp mm4 xmm4 fs cr4 dr4]  ...	REX.R=1::r[r12b r12w r12d r12 mm4  xmm12 fs  --- ---]</option>  
+<option value='101'> 	101	16bit || REX.R=0::r[ch bp ebp mm5 xmm5 gs --- dr5]  ...	REX.R=1::r[r13b r13w r13d r13 mm5  xmm13 gs  --- ---]</option>    
+<option value='110'> 	110 16bit || REX.R=0::r[dh si esi mm6 xmm6 -- --- dr6]  ...	REX.R=1::r[r14b r14w r14d r14 mm6  xmm14 --  --- ---]</option>     
+<option value='111'> 	111	16bit || REX.R=0::r[bh di edi mm7 xmm7 -- --- dr7] 	...	REX.R=1::r[r15b r15w r15d r15 mm7  xmm15 --  --- ---]</option>     
+</select>
+<br><button id="btn_modregrm">mod reg rm</button>::[<strong><label id="lbl_modregrm"></label></strong>]
+<hr>
+sib ndx
+<br><select id="select_sib_ss_ndx"> 
+
+<option value='*'>*</option>
+<option value='{ "ss":"00","ndx":"000"  }'>  REX.X=0::[RAX/EAX]	... REX.X=1::[R8/R8D] </option>
+<option value='{ "ss":"00","ndx":"001"	}'>  REX.X=0::[RCX/ECX]	... REX.X=1::[R9/R9D] </option> 
+<option value='{ "ss":"00","ndx":"010"	}'>  REX.X=0::[RDX/EDX]	... REX.X=1::[R10/R10D] </option>	 
+<option value='{ "ss":"00","ndx":"011"	}'>  REX.X=0::[RBX/EBX]	... REX.X=1::[R11/R11D]  </option>
+<option value='{ "ss":"00","ndx":"100"	}'>  REX.X=0::none		... REX.X=1::[R12/R12D] </option> 
+<option value='{ "ss":"00","ndx":"101"	}'>  REX.X=0::[RBP/EBP]	... REX.X=1::[R13/R13D] </option> 
+<option value='{ "ss":"00","ndx":"110" }'>  REX.X=0::[RSI/ESI]	... REX.X=1::[R14/R14D]  </option>
+<option value='{ "ss":"00","ndx":"111"	}'>  REX.X=0::[RDI/EDI]	... REX.X=1::[R15/R15D] </option> 
+
+<option value='{ "ss":"01","ndx":"000"  }'>  REX.X=0::[RAX/EAX*2] ...	REX.X=1::[R8/R8D*2]  </option>
+<option value='{ "ss":"01","ndx":"001"	}'>  REX.X=0::[RCX/ECX*2] ...	REX.X=1::[R9/R9D*2]	 </option> 
+<option value='{ "ss":"01","ndx":"010"	}'>  REX.X=0::[RDX/EDX*2] ...	REX.X=1::[R10/R10D*2] </option>	 
+<option value='{ "ss":"01","ndx":"011"	}'>  REX.X=0::[RBX/EBX*2] ...	REX.X=1::[R11/R11D*2] </option>	 
+<option value='{ "ss":"01","ndx":"100"	}'>  REX.X=0::none		 ...	REX.X=1::[R12/R12D*2] </option>
+<option value='{ "ss":"01","ndx":"101"	}'>  REX.X=0::[RBP/EBP*2] ...	REX.X=1::[R13/R13*2]  </option>
+<option value='{ "ss":"01","ndx":"110"	}'>  REX.X=0::[RSI/ESI*2] ...	REX.X=1::[R14/R14D*2]  </option>
+<option value='{ "ss":"01","ndx":"111"	}'>  REX.X=0::[RDI/EDI*2] ...	REX.X=1::[R15/R15D*2] </option> 
+
+<option value='{ "ss":"10","ndx":"000"  }'>  REX.X=0::[RAX/EAX*4] ...	REX.X=1::[R8/R8D*4]  </option>
+<option value='{ "ss":"10","ndx":"001"	}'>  REX.X=0::[RCX/ECX*4] ...	REX.X=1::[R9/R9D*4]  </option>
+<option value='{ "ss":"10","ndx":"010"	}'>  REX.X=0::[RDX/EDX*4] ...	REX.X=1::[R10/R10D*4]  </option>
+<option value='{ "ss":"10","ndx":"011"	}'>  REX.X=0::[RBX/EBX*4] ...	REX.X=1::[R11/R11D*4]  </option>
+<option value='{ "ss":"10","ndx":"100"	}'>  REX.X=0::none		 ... 	REX.X=1::[R12/R12D*4]  </option>
+<option value='{ "ss":"10","ndx":"101"	}'>  REX.X=0::[RBP/EBP*4] ...	REX.X=1::[R13/R13*4]  </option>
+<option value='{ "ss":"10","ndx":"110"	}'>  REX.X=0::[RSI/ESI*4] ...	REX.X=1::[R14/R14D*4]  </option>
+<option value='{ "ss":"10","ndx":"111"	}'>  REX.X=0::[RDI/EDI*4] ...	REX.X=1::[R15/R15D*4]  </option>
+
+<option value='{ "ss":"11","ndx":"000"  }'>  REX.X=0::[RAX/EAX*8] ...	REX.X=1::[R8/R8D*8] </option> 
+<option value='{ "ss":"11","ndx":"001"	}'>  REX.X=0::[RCX/ECX*8] ...	REX.X=1::[R9/R9D*8]  </option>
+<option value='{ "ss":"11","ndx":"010"	}'>  REX.X=0::[RDX/EDX*8] ...	REX.X=1::[R10/R10D*8] </option> 
+<option value='{ "ss":"11","ndx":"011"	}'>  REX.X=0::[RBX/EBX*8] ...	REX.X=1::[R11/R11D*8]  </option>
+<option value='{ "ss":"11","ndx":"100"	}'>  REX.X=0::none		 ...	REX.X=1::[R12/R12D*8]  </option>
+<option value='{ "ss":"11","ndx":"101"	}'>  REX.X=0::[RBP/EBP*8] ...	REX.X=1::[R13/R13*8]  </option>
+<option value='{ "ss":"11","ndx":"110"	}'>  REX.X=0::[RSI/ESI*8] ... 	REX.X=1::[R14/R14D*8]  </option>
+<option value='{ "ss":"11","ndx":"111"	}'>  REX.X=0::[RDI/EDI*8] ...	REX.X=1::[R15/R15D*8]  </option>
+
+</select>
+<br>reg
+<br><select id="select_sib_reg">
+<option value='*'>*</option>
+<option value='000'>000 ... REX.B=0::rax/eax	REX.B=1::r8/r8d		</option> 
+<option value='001'>001 ... REX.B=0::rcx/ecx	REX.B=1::r9/r9d 	</option> 
+<option value='010'>010 ... REX.B=0::rdx/edx	REX.B=1::r10/r10d 	</option> 
+<option value='011'>011 ... REX.B=0::rbx/ebx  	REX.B=1::r11/r11d	</option>  
+<option value='100'>100 ... REX.B=0::rsp/esp  	REX.B=1::r12/r12d 	</option> 
+<option value='101'>101 ... REX.B=0::---/---	REX.B=1::---/--- 	</option>   
+<option value='110'>110 ... REX.B=0::rsi/esi	REX.B=1::r14/r14d	</option> 
+<option value='111'>111 ... REX.B=0::rdi/edi  	REX.B=1::r15/r15d	</option> 
+</select>
+<br><button id="btn_sib">ss ndx reg</button>::<strong>[<label id="lbl_sib"></label>]</strong>
+<hr>
+disp <input id="disp" value='12345678'></input>
+<hr>
+imm <input id="imm" value='abcdef09'></input>
+<hr>
+<button id="assemble">assemble</button>
+<br>
+<textarea id="output" rows="1" cols="50"></textarea>
+</body>
+
+<script>
+
+// *********************************
+// UTILITY
+// *********************************
+
+function convBinToHex(value, padding) 
+{
+    var hex = parseInt(value,2).toString(16).toUpperCase();
+    padding = typeof (padding) === "undefined" || padding === null ? padding = 2 : padding;
+
+    while (hex.length < padding) 
+    {
+        hex = "0" + hex;
+    }
+    return hex;
+}
+function p2(hex) // padding 2 hex
+{
+    if (hex=='') return ''
+    while (hex.length < 2) 
+    {
+        hex = "0" + hex;
+    }
+    return hex;
+}
+function convHexToBin(hex)
+{
+    return (parseInt(hex, 16).toString(2)).padStart(8, '0');
+}
+
+// *********************************
+// GLOBAL VAR
+// *********************************
+
+var value_so                    =   0
+var value_istr_prefix_lock_rep  =   0
+var value_segment_override      =   0
+var value_operand_size_override =   0
+var value_address_size_override =   0
+
+var value_rex_base  =   0
+var value_rex_w     =   0
+var value_rex_r     =   0
+var value_rex_x     =   0
+var value_rex_b     =   0
+var value_rex_bin   =   0
+var value_rex_hex   =   0
+
+var value_opcode_pf =   0
+var value_opcode_0f =   0
+var value_opcode_po =   0
+var value_opcode_so =   0
+var value_opcode_o  =   0
+
+var value_opcode_po_imm =   0
+var value_opcode_po_d   =   0
+var value_opcode_po_s   =   0
+
+var value_modregrm_mod  	= 0 
+var value_modregrm_reg  	= 0
+var value_modregrm_rm		= 0
+var value_modregrm_option 	= 0
+var value_modregrm_hex		= '*'
+
+var value_sib_ss  = 0 ;
+var value_sib_ndx = 0 ;
+var value_sib_reg = 0 ;
+var value_sib_bin = 0 ;
+var value_sib_hex = '*' ;
+
+var value_disp = 0 ;
+var value_imm = 0;
+
+var imm_size = 0 ;
+
+// *********************************
+// READY
+// *********************************
+
+$( document ).ready(function() 
+{
+    // ottieni la tabella degli operatori
+    op_tab = $('#opcode_tab').text();
+
+    // suddividi la tabella in righe
+    op_arr = []
+    k_rig = -1 ;
+
+    for ( i=0; i< op_tab.length; i++ )
+    {
+        if ( op_tab[i] == '§' )
+        {
+            ++k_rig;
+            op_arr[k_rig]=[];
+        }
+        op_arr[k_rig] += op_tab[i] ;
+    }
+    ++k_rig; // ultima riga per iterare < di
+
+    for ( i=0; i< k_rig; i++ )
+    {
+        op_arr[i] = op_arr[i].split(",");
+    }
+    
+    /*
+        0   =   opcode name
+        
+        1   =   op1
+        2   =   op2
+        3   =   op3
+        4   =   op4
+
+        7   =   pf
+        8   =   0f
+        9   =   po
+        10  =   so
+
+    */
+    
+    // componi json per meglio accedere all'opcode primario
+
+	option = "<option value='*'>*</option>" ; // default
+	$('#select_opcode').append( option ) ;
+    
+    for ( i=0; i< k_rig; i++ )
+    {
+            text  = op_arr[i][1] + ' ' + op_arr[i][2] + ' ' + op_arr[i][3] + ' ' + op_arr[i][4] + ' ' + op_arr[i][5] + ' ' + op_arr[i][6];
+            
+            value  = '{'
+            value += '"pf" : "' + p2(op_arr[i][ 7]) + '" , ' 
+            value += '"0f" : "' + p2(op_arr[i][ 8]) + '" , ' 
+            value += '"po" : "' + p2(op_arr[i][ 9]) + '" , '             
+            value += '"so" : "' + p2(op_arr[i][10]) + '" , '
+            value += '"o"  : "' + p2(op_arr[i][11]) + '"'
+            value += '}'
+            
+            text = text.trim();
+            value= value.trim();            
+            option = "<option value='"+value+"'>"+text+"</option>"
+            $('#select_opcode').append( option ) ;
+   }
+
+});
+
+// *********************************
+// GLOBAL EVENT
+// *********************************
+
+$(".rex").change(function() // ricalcola REX ogni volta che cambia
+{
+    value_rex_base= $("#select_rex_base option:selected").val();
+ 
+    if (( value_rex_base != '*' )&&( value_rex_base != '' ))
+    {
+        value_rex_w= $("#select_rex_w option:selected").val();
+        value_rex_r= $("#select_rex_r option:selected").val();
+        value_rex_x= $("#select_rex_x option:selected").val();
+        value_rex_b= $("#select_rex_b option:selected").val();
+        value_rex_bin   = value_rex_base + value_rex_w + value_rex_r + value_rex_x + value_rex_b
+        value_rex_hex   = convBinToHex(value_rex_bin, 2)
+        $('#rex_opcode').text( value_rex_hex );
+    }
+    else
+    {
+        $('#rex_opcode').text( '' );
+    }
+});
+
+$("#select_opcode").change(function() // calcola opcode : imm,d,s
+{
+    text    =   $("#select_opcode option:selected").val() ;
+
+	if ( text=='*' )
+	{
+		value_opcode_pf =   0
+		value_opcode_0f =   0
+		value_opcode_po =   0
+		value_opcode_so =   0
+		value_opcode_o  =   0
+
+		value_opcode_po_imm =   0
+		value_opcode_po_d   =   0
+		value_opcode_po_s   =   0
+
+		$('#lbl_opcode_pf').html( '' ) ;
+		$('#lbl_opcode_0f').html( '' ) ;
+		$('#lbl_opcode_po').html( '' ) ;
+		$('#lbl_opcode_so').html( '' ) ;
+		$('#lbl_opcode_po_imm'  ).html( '' ) ;
+		$('#lbl_opcode_po_d'    ).html( '' ) ;
+		$('#lbl_opcode_po_s'    ).html( '' ) ;   
+		$('#lbl_opcode_o').html( '' ) ;		
+
+		return 
+	} 
+
+    value    =  JSON.parse( text ) ;
+
+    //console.log ( "select opcode value :: ",value );
+ 
+    value_opcode_pf =   value['pf']
+    value_opcode_0f =   value['0f']
+    value_opcode_po =   value['po']
+    value_opcode_so =   value['so']
+    value_opcode_o  =   value['o']
+    
+    //console.log ( "pf 0f po so :: " , value_opcode_pf , value_opcode_0f , value_opcode_po , value_opcode_so)
+    
+    $('#lbl_opcode_pf').html( value_opcode_pf ) ;
+    $('#lbl_opcode_0f').html( value_opcode_0f ) ;
+    $('#lbl_opcode_po').html( value_opcode_po ) ;
+    $('#lbl_opcode_so').html( value_opcode_so ) ;
+    $('#lbl_opcode_o' ).html( value_opcode_o ) ;
+    
+    // converti l'opcode primario in binario per estrarene le informazioni
+    
+    value  = convHexToBin( value_opcode_po ) 
+    
+    // value = (parseInt(value_opcode_po, 16).toString(2)).padStart(8, '0');
+    
+    console.log ( "value_opcode_po :: bin :: ",value ); 
+
+    // [0] 1 2 3 4 5 [6] [7]
+
+    value_opcode_po_imm =   value[0]
+    value_opcode_po_d   =   value[6]
+    value_opcode_po_s   =   value[7]
+
+    $('#lbl_opcode_po_imm'  ).html( value_opcode_po_imm ) ;
+    $('#lbl_opcode_po_d'    ).html( value_opcode_po_d ) ;
+    $('#lbl_opcode_po_s'    ).html( value_opcode_po_s ) ;    
+
+});
+
+
+$("#select_modregrm_modrm").change(function() // calcola mod reg rm
+{
+    value_modregrm_modrm= $("#select_modregrm_modrm option:selected").val();
+    console.log ( 'value_modregrm_modrm::'+value_modregrm_modrm );
+
+    value    =  JSON.parse( value_modregrm_modrm ) ;
+	
+	value_modregrm_mod = value.mod ;
+    console.log ( 'value_modregrm_mod::'+value_modregrm_mod );
+
+	value_modregrm_rm = value.rm ;
+    console.log ( 'value_modregrm_rm::'+value_modregrm_rm );
+
+    value_modregrm_option= $("#select_modregrm_modrm option:selected").html();
+    console.log ( 'value_modregrm_option::'+value_modregrm_option );
+
+
+});
+
+$("#select_modregrm_modrm_reg").change(function() // calcola mod reg rm
+{
+    value_modregrm_reg= $("#select_modregrm_modrm_reg option:selected").val();
+    console.log ( 'value_modregrm_reg::'+value_modregrm_reg );
+
+});
+
+$("#btn_modregrm").click(function() 
+{
+	// default
+	value_modregrm_bin = value_modregrm_mod + value_modregrm_rm + value_modregrm_reg;
+
+	if ( value_opcode_po_imm==1 ) 
+    {
+		// per i valori immediati il bit D 	non conta
+		// per tanto il mod reg rm 			non conta
+		// vale solo mod reg
+		// il rm è sostituito da questi valori
+
+		if (value_opcode_o == '00' ) value_modregrm_rm='000'
+		if (value_opcode_o == '01' ) value_modregrm_rm='001'
+		if (value_opcode_o == '02' ) value_modregrm_rm='010'
+		if (value_opcode_o == '03' ) value_modregrm_rm='011'
+		if (value_opcode_o == '04' ) value_modregrm_rm='100'
+		if (value_opcode_o == '05' ) value_modregrm_rm='101'
+		if (value_opcode_o == '06' ) value_modregrm_rm='110'
+		if (value_opcode_o == '07' ) value_modregrm_rm='111'
+		value_modregrm_bin = value_modregrm_mod + value_modregrm_rm + value_modregrm_reg;
+    }
+	if ( value_opcode_po_imm==0 ) 
+    {
+		if ( value_opcode_po_d==1 ) 
+			value_modregrm_bin = value_modregrm_mod + value_modregrm_reg + value_modregrm_rm ; 
+
+		if ( value_opcode_po_d==0 ) 
+			value_modregrm_bin = value_modregrm_mod + value_modregrm_rm + value_modregrm_reg; 
+    }
+
+	console.log ( 'value_modregrm_bin::',value_modregrm_bin)
+
+	value_modregrm_hex = convBinToHex(value_modregrm_bin,2);
+
+	/**/
+
+	/* imm */
+
+	// se il bit più alto dell' opcode primario è 1, allora si tratta si trattare una costante immediata
+	// non si può specificare una constante come destinazione
+	// per tanto l'operando di destinazione è sempre MOD R/M
+	// 8bit il flag di direzione è ignorato
+	// 16/32 x specifica il size
+	// x==0 la costante è lo stesso dell'operando
+	// x==1 è 8 bit
+	// REG NOT USE
+	// REG MUST CONTAIN 'o'
+
+	if ( value_opcode_po_imm == 1 )
+	{
+		value_modregrm_mod = value_modregrm_mod
+
+		value = $('#lbl_modregrm').html()
+
+		if ( value=='00' ) value_modregrm_reg = '000'
+ 		if ( value=='01' ) value_modregrm_reg = '001'
+		if ( value=='02' ) value_modregrm_reg = '010'
+ 		if ( value=='03' ) value_modregrm_reg = '011'
+		if ( value=='04' ) value_modregrm_reg = '100'
+ 		if ( value=='05' ) value_modregrm_reg = '101'
+		if ( value=='06' ) value_modregrm_reg = '110'
+ 		if ( value=='07' ) value_modregrm_reg = '111'
+
+		value_modregrm_rm  = value_modregrm_rm
+
+		value_modregrm_bin = value_modregrm_mod + value_modregrm_reg + value_modregrm_rm ;
+
+		value_modregrm_hex = convBinToHex(value_modregrm_bin,2);
+
+
+	}
+
+	/**/
+
+	console.log ( 'value_modregrm_hex::',value_modregrm_hex)
+
+    $('#lbl_modregrm').html( value_modregrm_bin + ' / ' + value_modregrm_hex ) ;
+
+});
+
+$("#select_sib_ss_ndx").change(function() // calcola mod reg rm
+{
+    value_select_sib_ss_ndx= $("#select_sib_ss_ndx option:selected").val();
+    console.log ( 'value_select_sib_ss_ndx::'+value_select_sib_ss_ndx );
+ 
+    value    =  JSON.parse( value_select_sib_ss_ndx ) ;
+	
+	value_sib_ss  = value.ss ;	console.log ('value_sib_ss::',value_sib_ss ) ;
+
+	value_sib_ndx = value.ndx ;	console.log ('value_sib_ndx::',value_sib_ndx ) ;
+
+});
+
+$("#select_sib_reg").change(function() // calcola mod reg rm
+{
+    value_sib_reg= $("#select_sib_reg option:selected").val();
+    console.log ( 'value_sib_reg::'+value_sib_reg );
+});
+
+$("#btn_sib").click(function() 
+{
+	value_sib_bin = value_sib_ss + value_sib_ndx + value_sib_reg
+
+	console.log ( 'value_sib_bin::',value_sib_bin)
+
+	value_sib_hex = convBinToHex(value_sib_bin,2);
+
+	console.log ( 'value_sib_hex::',value_sib_hex)
+
+    $('#lbl_sib').html( value_sib_bin + ' / ' + value_sib_hex ) ;
+
+});
+
+function getOffset(offset,nbyte)
+{
+	ret = '' ;
+	for(i=nbyte*2;i>1;i-=2)
+	{
+		ret += ' ' 
+		ret += offset[i-2]
+		ret += offset[i-1]
+	}
+
+	return ret ;
+}
+
+// *********************************
+// MAIN
+// *********************************
+
+$("#assemble").click(function()
+{
+    console.log('------------')
+    console.log('- assemble -')
+    console.log('------------')
+
+    output = " ";
+
+    /* so */
+
+    value_so= $("#select_so option:selected").val();
+    console.log ( 'select_so::'+value_so );
+    
+    /* prefissi */
+
+    value_istr_prefix_lock_rep= $("#select_istr_prefix_lock_rep option:selected").val();
+    console.log ( 'select_istr_prefix_lock_rep::'+value_istr_prefix_lock_rep );
+    
+    value_segment_override= $("#select_segment_override option:selected").val();
+    console.log ( 'select_segment_override::'+value_segment_override );
+
+    value_operand_size_override= $("#select_operand_size_override option:selected").val();
+    console.log ( 'select_operand_size_override::'+value_operand_size_override );
+
+    value_address_size_override= $("#select_address_size_override option:selected").val();
+    console.log ( 'select_address_size::'+value_address_size_override );
+
+    /* rex */
+
+    value_rex_opcode= $("#rex_opcode").html();
+    console.log ( 'rex::'+value_rex_opcode);
+
+    /* opcode */
+
+	value_opcode_pf 	=   $('#lbl_opcode_pf').html() ;	console.log  ("value_opcode_pf",value_opcode_pf);
+	value_opcode_0f 	= 	$('#lbl_opcode_0f').html(  ) ;	console.log  ("value_opcode_0f",value_opcode_0f);
+	value_opcode_po 	=	$('#lbl_opcode_po').html(  ) ;	console.log  ("value_opcode_po",value_opcode_po);
+	value_opcode_so 	=	$('#lbl_opcode_so').html( ) ;	console.log  ("value_opcode_so",value_opcode_so);
+
+    /* mod reg rm */
+
+    value_modregrm_option= $("#select_modregrm_modrm option:selected").html();
+    console.log ( 'value_modregrm_option::'+value_modregrm_option );
+
+	console.log ( 'value_modregrm_mod::',value_modregrm_mod) ;
+	console.log ( 'value_modregrm_rm::' ,value_modregrm_rm) ;
+	console.log ( 'value_modregrm_reg::',value_modregrm_reg) ;
+	console.log ( 'value_modregrm_hex::',value_modregrm_hex) ;
+
+    /* sib */
+
+	console.log ( 'value_sib_ss::'  , value_sib_ss )
+	console.log ( 'value_sib_ndx::' , value_sib_ndx)
+	console.log ( 'value_sib_reg::' , value_sib_reg)
+	console.log ( 'value_sib_bin::' , value_sib_bin )
+	console.log ( 'value_sib_hex::' , value_sib_hex)
+
+	/* disp */
+
+	value_disp = $('#disp').val();	console.log ('value_disp::',value_disp ) ;
+
+	/* imm */
+
+	value_imm = $('#imm').val();	console.log ('value_imm::',value_imm ) ;
+
+	/* assemble */
+
+	output = '' ;
+	output += value_istr_prefix_lock_rep ;
+	output += ' ' ;
+	output += value_segment_override
+	output += ' ' ;
+	output += value_operand_size_override
+	output += ' ' ;
+	output += value_address_size_override 
+
+	/* rex */
+
+	output += ' ' ;
+	output += value_rex_opcode 
+
+	/* opcode */
+
+	output += ' ' ;
+	output += value_opcode_pf 
+	output += ' ' ;
+	output += value_opcode_0f
+	output += ' ' ;
+	output += value_opcode_po 
+	output += ' ' ;
+	output += value_opcode_so
+
+	if ( value_modregrm_hex != '*' ) 
+	{
+		output += ' ' ;
+		output += value_modregrm_hex
+	}
+
+	/* sib */
+
+	if ( value_sib_hex != '*' ) 
+	{
+		output += ' ' ;
+		output += value_sib_hex
+	}
+	/* disp */
+
+    mod_disp = 0
+	mod_sel = $( "#select_modregrm_modrm option:selected" ).text();
+	// 8
+    if ( mod_sel.indexOf('disp8')!=-1 )			mod_disp = 1
+	// 16
+	if ( value_operand_size_override=='66' ) 	mod_disp = 2
+	// 32
+    if ( mod_sel.indexOf('disp32')!=-1 )		mod_disp = 4	
+	// 64
+	if ( value_rex_w == 1 ) mod_disp = 4
+
+	if ( mod_disp != 0 )
+	{
+		imm_sel = $( "#select_opcode option:selected" ).text();
+		if ( imm_sel.indexOf('imm') == -1 )
+		{
+			value = $( "#disp" ).val()
+			console.log ( "DISP::",value )
+			offset = getOffset( value, mod_disp )
+			console.log ( "DISP OFFSET::",offset )
+			output += offset;
+		}
+	}
+
+	/* imm */
+
+		/**/
+
+		imm_sel = $( "#select_opcode option:selected" ).text();
+
+		if ( imm_sel.indexOf('imm8') == -1 ) 
+			imm_size=4
+		else
+			imm_size=1
+
+		if ((imm_size==4) && (value_operand_size_override=='66' ))
+			imm_size=2
+
+	if ( imm_size != 0 )
+	{
+		value = $( "#imm" ).val()
+		console.log ( "IMM::",value )
+		offset = getOffset( value, imm_size )
+		console.log ( "IMM OFFSET::",offset )
+		output += offset;
+	}
+
+	/* output  */
+
+	$('#output').val(output)
+});
+
+</script>
+
+
